@@ -38,15 +38,28 @@ namespace CFObjectMapper
                 else     // Use map method (Reflection)
                 {
                     var mapFunction = (MethodInfo)objectMappingConfig.MapFunction;
-                    var methodParameters = new object[]
+
+                    // Set method parameters. We allow the user to set the parameters in any order and Parameters & IObjectMapper
+                    // are optional.
+                    var methodParameters = new List<object>();
+                    foreach(var parameter in mapFunction.GetParameters())
                     {
-                        source,
-                        parameters,
-                        this
-                    };
+                        if (parameter.ParameterType == typeof(IObjectMapper))
+                        {
+                            methodParameters.Add(this);
+                        }
+                        else if (parameter.ParameterType == typeof(IReadOnlyDictionary<string, object>))
+                        {
+                            methodParameters.Add(parameters);
+                        }
+                        else
+                        {
+                            methodParameters.Add(source);
+                        }
+                    }
 
                     var mappingClassInstance = Activator.CreateInstance(objectMappingConfig.MappingClassType);
-                    var result = (TDestination)mapFunction.Invoke(mappingClassInstance, methodParameters);
+                    var result = (TDestination)mapFunction.Invoke(mappingClassInstance, methodParameters.ToArray());
                     return result;
                 }               
             }

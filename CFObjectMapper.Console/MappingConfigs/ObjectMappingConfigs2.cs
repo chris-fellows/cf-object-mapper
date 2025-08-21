@@ -28,7 +28,7 @@ namespace CFObjectMapper.Console.MappingConfigs
         }
 
         [ObjectMapping]
-        public ViewModelChild Map(DataModelChild source, IReadOnlyDictionary<string, object> parameters, IObjectMapper objectMapper)
+        public ViewModelChild Map(DataModelChild source, IReadOnlyDictionary<string, object> parameters)    //, IObjectMapper objectMapper)
         {
             var userService = (IUserService)parameters["UserService"];
 
