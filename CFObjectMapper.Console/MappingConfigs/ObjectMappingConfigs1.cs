@@ -1,16 +1,15 @@
 ﻿using CFObjectMapper.Console.Interfaces;
 using CFObjectMapper.Console.Models;
 using CFObjectMapper.Interfaces;
-
 namespace CFObjectMapper.Console.MappingConfigs
 {
     /// <summary>
-    /// Loads object mapping configs
+    /// Object mapping configs using function
     /// </summary>
-    public class ObjectMappingConfigsLoader
+    public class ObjectMappingConfigs1
     {
         public void Add(IObjectMappingConfigs objectMappingConfigs)
-        {
+        {            
             objectMappingConfigs.Add<DataModel, ViewModel>((source, parameters, objectMapper) =>
             {
                 var destination = new ViewModel()
@@ -34,6 +33,6 @@ namespace CFObjectMapper.Console.MappingConfigs
                     CreatedOn = source.CreatedOn
                 };
             });
-        }
+        }       
     }
 }

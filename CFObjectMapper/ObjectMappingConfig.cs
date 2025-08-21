@@ -6,6 +6,8 @@
 
         public Type DestinationType { get; set; } = default!;
 
-        public object MapFunction { get; set; } = default!;
+        public Type? MappingClassType { get; set; } = default!;
+
+        public object MapFunction { get; set; } = default!;     
     }
 }

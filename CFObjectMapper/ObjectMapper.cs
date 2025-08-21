@@ -1,4 +1,5 @@
 ﻿using CFObjectMapper.Interfaces;
+using System.Reflection;
 
 namespace CFObjectMapper
 {
@@ -18,7 +19,7 @@ namespace CFObjectMapper
         }
 
         public TDestination Map<TSource, TDestination>(TSource source,
-                                            IReadOnlyDictionary<string, object>? parameters = null)
+                                                    IReadOnlyDictionary<string, object>? parameters = null)
         {
             try
             {                                
@@ -28,8 +29,26 @@ namespace CFObjectMapper
                     throw new ArgumentException("No mapping defined");
                 }
 
-                var mapFunction = (Func<TSource, IReadOnlyDictionary<string, object>?, IObjectMapper, TDestination>)objectMappingConfig.MapFunction;
-                return mapFunction(source, parameters, this);
+                // Execute mapping
+                if (objectMappingConfig.MappingClassType == null)   // Use map function
+                {
+                    var mapFunction = (Func<TSource, IReadOnlyDictionary<string, object>?, IObjectMapper, TDestination>)objectMappingConfig.MapFunction;
+                    return mapFunction(source, parameters, this);
+                }
+                else     // Use map method (Reflection)
+                {
+                    var mapFunction = (MethodInfo)objectMappingConfig.MapFunction;
+                    var methodParameters = new object[]
+                    {
+                        source,
+                        parameters,
+                        this
+                    };
+
+                    var mappingClassInstance = Activator.CreateInstance(objectMappingConfig.MappingClassType);
+                    var result = (TDestination)mapFunction.Invoke(mappingClassInstance, methodParameters);
+                    return result;
+                }               
             }
             finally
             {

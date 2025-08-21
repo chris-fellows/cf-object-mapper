@@ -1,18 +1,26 @@
-﻿namespace CFObjectMapper.Interfaces
+﻿using System.Reflection;
+
+namespace CFObjectMapper.Interfaces
 {
     /// <summary>
     /// Object mapping configs
     /// </summary>
     public interface IObjectMappingConfigs
-    {   
+    {
         /// <summary>
-        /// Adds mapping config
+        /// Adds mapping configs from assembly where mapping method has ObjectMapping attribute
+        /// </summary>
+        /// <param name="assembly"></param>
+        void Add(Assembly assembly);
+
+        /// <summary>
+        /// Adds mapping config using a function
         /// </summary>
         /// <typeparam name="TSource"></typeparam>
         /// <typeparam name="TDestination"></typeparam>
         /// <param name="mappingFunction"></param>
         void Add<TSource, TDestination>(Func<TSource, IReadOnlyDictionary<string, object>?, IObjectMapper, TDestination> mappingFunction);
-
+       
         /// <summary>
         /// Removes mapping config
         /// </summary>

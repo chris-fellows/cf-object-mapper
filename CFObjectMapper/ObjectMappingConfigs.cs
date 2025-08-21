@@ -1,4 +1,5 @@
 ﻿using CFObjectMapper.Interfaces;
+using System.Reflection;
 
 namespace CFObjectMapper
 {
@@ -39,7 +40,58 @@ namespace CFObjectMapper
                 {
                     SourceType = typeof(TSource),
                     DestinationType = typeof(TDestination),
+                    MappingClassType = null,
                     MapFunction = mapFunction
+                };
+                _objectMappingConfigs.Add(objectMappingConfig);
+            }
+            finally
+            {
+                _mutex.ReleaseMutex();
+            }
+        }
+
+        public void Add(Assembly assembly)
+        {
+            var types = assembly.GetTypes().Where(type => type.IsClass && type.IsPublic);
+
+            foreach (var mappingClassType in types)
+            {
+                var methods = mappingClassType.GetMethods();
+                foreach (var method in methods)
+                {
+                    var attribute = method.GetCustomAttribute(typeof(ObjectMappingAttribute));
+                    if (attribute != null)
+                    {
+                        var returnType = method.ReturnType;
+                        var parameters = method.GetParameters();
+
+                        Add(parameters[0].ParameterType, returnType, mappingClassType, method);
+                    }                    
+                }
+            }
+        }
+
+        private void Add(Type sourceType, Type destinationType, Type mappingClassType, MethodInfo method)
+        {
+            try
+            {
+                _mutex.WaitOne();
+
+                // Remove any existing mapping
+                var objectMappingConfig = (ObjectMappingConfig?)Get(sourceType, destinationType);
+                if (objectMappingConfig != null)
+                {
+                    _objectMappingConfigs.Remove((ObjectMappingConfig)objectMappingConfig);
+                }
+
+                // Add
+                objectMappingConfig = new ObjectMappingConfig()
+                {
+                    SourceType = sourceType,
+                    DestinationType = destinationType,
+                    MappingClassType = mappingClassType,
+                    MapFunction = method
                 };
                 _objectMappingConfigs.Add(objectMappingConfig);
             }

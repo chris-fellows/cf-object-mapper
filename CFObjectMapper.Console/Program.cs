@@ -4,12 +4,16 @@ using CFObjectMapper.Console.MappingConfigs;
 using CFObjectMapper.Console.Models;
 using CFObjectMapper.Console.Services;
 using CFObjectMapper.Interfaces;
+using System.Diagnostics;
 
 // Create object mapping configs (Singleton)
 IObjectMappingConfigs objectMappingConfigs = new ObjectMappingConfigs();
 
-// Load object mappings
-new ObjectMappingConfigsLoader().Add(objectMappingConfigs);
+// Load mappings by scanning assembly
+objectMappingConfigs.Add(typeof(Program).Assembly);
+
+// Load object mappings by adding mapping functions individually
+//new ObjectMappingConfigs2().Add(objectMappingConfigs);
 
 // Create object mapper (Scoped, uses singleton IObjectMappingConfigs)
 IObjectMapper objectMapper = new ObjectMapper(objectMappingConfigs);
